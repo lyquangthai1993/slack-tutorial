@@ -6,14 +6,22 @@ import {FcGoogle} from "react-icons/fc";
 import {FaGithub} from "react-icons/fa";
 import {SignInFlow} from "@/features/auth/types";
 import {useState} from "react";
+import {useAuthActions} from "@convex-dev/auth/react";
 
 interface SignInCardProps {
     setState: (state: SignInFlow) => void;
 }
 
-const SignInCard = ({setState}:SignInCardProps) => {
+const SignInCard = ({setState}: SignInCardProps) => {
+    const {signIn} = useAuthActions();
+
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+
+    const handleProviderSignIn = (value: 'google' | 'github') => {
+        signIn(value);
+    };
+
     return (
         <Card className={'w-full h-full p-8'}>
             <CardHeader className={'px-0 pt-0'}>
@@ -28,7 +36,6 @@ const SignInCard = ({setState}:SignInCardProps) => {
                 <form className={'space-y-2.5'}>
                     <Input
                         disabled={false}
-                        label={'Email'}
                         name={'email'}
                         placeholder={'Enter your email'}
                         type={'email'}
@@ -41,7 +48,6 @@ const SignInCard = ({setState}:SignInCardProps) => {
 
                     <Input
                         disabled={false}
-                        label={'Password'}
                         name={'password'}
                         placeholder={'Enter your password'}
                         type={'password'}
@@ -63,6 +69,7 @@ const SignInCard = ({setState}:SignInCardProps) => {
                     <Button
                         disabled={false}
                         onClick={() => {
+                            handleProviderSignIn('google');
                         }}
                         variant="outline"
                         size="lg"
@@ -75,6 +82,7 @@ const SignInCard = ({setState}:SignInCardProps) => {
                     <Button
                         disabled={false}
                         onClick={() => {
+                            handleProviderSignIn('github');
                         }}
                         variant="outline"
                         size="lg"
@@ -87,7 +95,7 @@ const SignInCard = ({setState}:SignInCardProps) => {
 
                 <p className={'text-xs text-muted-foreground'}>
                     Don&apos;t have an account? <span className={'text-sky-700 hover:underline cursor-pointer'}
-                                                      onClick={()=>setState('signUp')}>Sign Up</span>
+                                                      onClick={() => setState('signUp')}>Sign Up</span>
                 </p>
             </CardContent>
         </Card>);

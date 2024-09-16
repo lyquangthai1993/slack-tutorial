@@ -5,8 +5,9 @@ import {Separator} from "@/components/ui/separator";
 import {FcGoogle} from "react-icons/fc";
 import {FaGithub} from "react-icons/fa";
 import {SignInFlow} from "@/features/auth/types";
-import {useState} from "react";
+import React, {useState} from "react";
 import {useAuthActions} from "@convex-dev/auth/react";
+import {TriangleAlert} from "lucide-react";
 
 interface SignInCardProps {
     setState: (state: SignInFlow) => void;
@@ -17,9 +18,30 @@ const SignInCard = ({setState}: SignInCardProps) => {
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [pending, setPending] = useState(false);
+    const [error, setError] = useState("");
+
+
+    const onPasswordSignIn = ((e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+
+        setPending(true);
+        signIn('password', {
+            email, password,
+            flow: 'signIn'
+        }).catch(() => {
+            setError('Invalid Email or Password');
+        }).finally(() => {
+            setPending(false);
+        });
+    });
 
     const handleProviderSignIn = (value: 'google' | 'github') => {
-        signIn(value);
+        setPending(true);
+        signIn(value)
+            .finally(() => {
+                setPending(false);
+            });
     };
 
     return (
@@ -28,14 +50,22 @@ const SignInCard = ({setState}: SignInCardProps) => {
                 <CardTitle>
                     Login to continue
                 </CardTitle>
+
+                <CardDescription>
+                    Use your email or another services to continue
+                </CardDescription>
             </CardHeader>
-            <CardDescription>
-                Use your email or another services to continue
-            </CardDescription>
+
+            {!!error && (
+                <div
+                    className={'bg-destructive/15 p-3 rounded-md flex items-center gap-x-2 text-sm text-destructive mb-6'}>
+                    <TriangleAlert className={'size-4'}/> <p>{error}</p>
+                </div>
+            )}
             <CardContent className={'space-y-5 px-0 pb-0'}>
-                <form className={'space-y-2.5'}>
+                <form className={'space-y-2.5'} onSubmit={onPasswordSignIn}>
                     <Input
-                        disabled={false}
+                        disabled={pending}
                         name={'email'}
                         placeholder={'Enter your email'}
                         type={'email'}
@@ -47,7 +77,7 @@ const SignInCard = ({setState}: SignInCardProps) => {
                     />
 
                     <Input
-                        disabled={false}
+                        disabled={pending}
                         name={'password'}
                         placeholder={'Enter your password'}
                         type={'password'}
@@ -58,7 +88,7 @@ const SignInCard = ({setState}: SignInCardProps) => {
                         required
                     />
 
-                    <Button type={"submit"} className={'w-full'} size="lg" disabled={false}>
+                    <Button type={"submit"} className={'w-full'} size="lg" disabled={pending}>
                         Continue
                     </Button>
                 </form>
@@ -67,7 +97,7 @@ const SignInCard = ({setState}: SignInCardProps) => {
 
                 <div className={'flex flex-col gap-y-2.5'}>
                     <Button
-                        disabled={false}
+                        disabled={pending}
                         onClick={() => {
                             handleProviderSignIn('google');
                         }}
@@ -80,7 +110,7 @@ const SignInCard = ({setState}: SignInCardProps) => {
                     </Button>
 
                     <Button
-                        disabled={false}
+                        disabled={pending}
                         onClick={() => {
                             handleProviderSignIn('github');
                         }}

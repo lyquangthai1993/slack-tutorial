@@ -5,16 +5,50 @@ import {Separator} from "@/components/ui/separator";
 import {FcGoogle} from "react-icons/fc";
 import {FaGithub} from "react-icons/fa";
 import {SignInFlow} from "@/features/auth/types";
-import {useState} from "react";
+import React, {useState} from "react";
+import {TriangleAlert} from "lucide-react";
+import {useAuthActions} from "@convex-dev/auth/react";
 
 interface SignUpCardProps {
     setState: (state: SignInFlow) => void;
 }
 
-const SignUpCard = ({setState}:SignUpCardProps) => {
+const SignUpCard = ({setState}: SignUpCardProps) => {
+    const {signIn} = useAuthActions();
+
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+
+    const [pending, setPending] = useState(false);
+    const [error, setError] = useState("");
+
+    const onPasswordSignUp = ((e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+
+        if (password !== confirmPassword) {
+            setError("Password does not match");
+            return;
+        }
+
+        setPending(true);
+        signIn('password', {
+            email, password,
+            flow: 'signUp'
+        }).catch(() => {
+            setError('Something went wrong');
+        }).finally(() => {
+            setPending(false);
+        });
+    });
+
+    const handleProviderSignIn = (value: 'google' | 'github') => {
+        setPending(true);
+        signIn(value)
+            .finally(() => {
+                setPending(false);
+            });
+    };
 
     return (
         <Card className={'w-full h-full p-8'}>
@@ -22,15 +56,22 @@ const SignUpCard = ({setState}:SignUpCardProps) => {
                 <CardTitle>
                     Sign up to continue
                 </CardTitle>
+                <CardDescription>
+                    Use your email or another services to continue
+                </CardDescription>
             </CardHeader>
-            <CardDescription>
-                Use your email or another services to continue
-            </CardDescription>
+
+            {!!error && (
+                <div
+                    className={'bg-destructive/15 p-3 rounded-md flex items-center gap-x-2 text-sm text-destructive mb-6'}>
+                    <TriangleAlert className={'size-4'}/> <p>{error}</p>
+                </div>
+            )}
+
             <CardContent className={'space-y-5 px-0 pb-0'}>
-                <form className={'space-y-2.5'}>
+                <form className={'space-y-2.5'} onSubmit={onPasswordSignUp}>
                     <Input
-                        disabled={false}
-                        label={'Email'}
+                        disabled={pending}
                         name={'email'}
                         value={email}
                         placeholder={'Enter your email'}
@@ -42,8 +83,7 @@ const SignUpCard = ({setState}:SignUpCardProps) => {
                     />
 
                     <Input
-                        disabled={false}
-                        label={'Password'}
+                        disabled={pending}
                         name={'password'}
                         value={password}
                         placeholder={'Enter your password'}
@@ -55,8 +95,7 @@ const SignUpCard = ({setState}:SignUpCardProps) => {
                     />
 
                     <Input
-                        disabled={false}
-                        label={'Confirm Password'}
+                        disabled={pending}
                         name={'confirm_password'}
                         value={confirmPassword}
                         placeholder={'Enter your password again'}
@@ -67,7 +106,7 @@ const SignUpCard = ({setState}:SignUpCardProps) => {
                         required
                     />
 
-                    <Button type={"submit"} className={'w-full'} size="lg" disabled={false}>
+                    <Button type={"submit"} className={'w-full'} size="lg" disabled={pending}>
                         Continue
                     </Button>
                 </form>
@@ -76,8 +115,9 @@ const SignUpCard = ({setState}:SignUpCardProps) => {
 
                 <div className={'flex flex-col gap-y-2.5'}>
                     <Button
-                        disabled={false}
+                        disabled={pending}
                         onClick={() => {
+                            handleProviderSignIn('google');
                         }}
                         variant="outline"
                         size="lg"
@@ -88,8 +128,9 @@ const SignUpCard = ({setState}:SignUpCardProps) => {
                     </Button>
 
                     <Button
-                        disabled={false}
+                        disabled={pending}
                         onClick={() => {
+                            handleProviderSignIn('github');
                         }}
                         variant="outline"
                         size="lg"

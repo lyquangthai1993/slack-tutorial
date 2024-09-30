@@ -7,7 +7,7 @@ import {FaGithub} from "react-icons/fa";
 import {SignInFlow} from "@/features/auth/types";
 import React, {useState} from "react";
 import {useAuthActions} from "@convex-dev/auth/react";
-import {TriangleAlert} from "lucide-react";
+import {Loader, TriangleAlert} from "lucide-react";
 
 interface SignInCardProps {
     setState: (state: SignInFlow) => void;
@@ -45,6 +45,7 @@ const SignInCard = ({setState}: SignInCardProps) => {
 
     return (
         <Card className={'w-full h-full p-8'}>
+
             <CardHeader className={'px-0 pt-0'}>
                 <CardTitle>
                     Login to continue
@@ -88,7 +89,7 @@ const SignInCard = ({setState}: SignInCardProps) => {
                     />
 
                     <Button type={"submit"} className={'w-full'} size="lg" disabled={pending}>
-                        Continue
+                        Continue {pending ? <Loader className={'ms-2 size-4 animate-spin text-muted-foreground'}/> : null}
                     </Button>
                 </form>
 

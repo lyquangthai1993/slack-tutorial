@@ -6,7 +6,7 @@ import {FcGoogle} from "react-icons/fc";
 import {FaGithub} from "react-icons/fa";
 import {SignInFlow} from "@/features/auth/types";
 import React, {useState} from "react";
-import {TriangleAlert} from "lucide-react";
+import {Loader, TriangleAlert} from "lucide-react";
 import {useAuthActions} from "@convex-dev/auth/react";
 
 interface SignUpCardProps {
@@ -33,6 +33,7 @@ const SignUpCard = ({setState}: SignUpCardProps) => {
         }
 
         setPending(true);
+
         signIn('password', {
             name,
             email,
@@ -122,7 +123,7 @@ const SignUpCard = ({setState}: SignUpCardProps) => {
                     />
 
                     <Button type={"submit"} className={'w-full'} size="lg" disabled={pending}>
-                        Continue
+                        Continue {pending ? <Loader className={'ms-2 size-4 animate-spin text-muted-foreground'}/> : null}
                     </Button>
                 </form>
 

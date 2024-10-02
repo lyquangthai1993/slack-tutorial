@@ -7,6 +7,7 @@ import {Button} from "@/components/ui/button";
 import useCreateWorkspace from "@/features/workspaces/api/use-create-workspace";
 import {useRouter} from "next/navigation";
 import React, {useState} from "react";
+import {toast} from "sonner";
 
 interface CreateWorkspaceModalProps {
 }
@@ -33,7 +34,7 @@ const CreateWorkspaceModal = ({}: CreateWorkspaceModalProps) => {
                     console.log("data = ", data);
                     setName('');
                     handleClose();
-
+                    toast.success('Workspace\'s created');
                     // ? redirect to that workspace id
                     router.push(`/workspace/${data}`);
                 },

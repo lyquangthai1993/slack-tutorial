@@ -6,27 +6,36 @@ import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
 import useCreateWorkspace from "@/features/workspaces/api/use-create-workspace";
 import {useRouter} from "next/navigation";
+import React, {useState} from "react";
 
 interface CreateWorkspaceModalProps {
 }
 
 const CreateWorkspaceModal = ({}: CreateWorkspaceModalProps) => {
     const [open, setOpen] = useCreateWorkspaceModal();
+    const [name, setName] = useState('');
+
     const router = useRouter();
-    const {mutate} = useCreateWorkspace();
+    const {mutate, isPending} = useCreateWorkspace();
 
     const handleClose = () => {
         setOpen(false);
     };
 
-    const handleSubmit = async () => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+
         try {
-            const data = await mutate({
-                name: 'Workspace 1'
+            await mutate({
+                name
             }, {
                 onSuccess(data) {
-                    router.push(`/workspaces/${data}`);
+                    console.log("data = ", data);
+                    setName('');
+                    handleClose();
+
                     // ? redirect to that workspace id
+                    router.push(`/workspace/${data}`);
                 },
                 onError(error) {
 
@@ -53,10 +62,11 @@ const CreateWorkspaceModal = ({}: CreateWorkspaceModalProps) => {
                     </DialogTitle>
                 </DialogHeader>
 
-                <form className={'space-y-4'}>
+                <form className={'space-y-4'} onSubmit={handleSubmit}>
                     <Input
-                        value=""
-                        disabled={false}
+                        value={name}
+                        onChange={e => setName(e.target.value)}
+                        disabled={isPending}
                         required
                         autoFocus
                         minLength={3}
@@ -64,7 +74,7 @@ const CreateWorkspaceModal = ({}: CreateWorkspaceModalProps) => {
                     />
 
                     <div className={'flex justify-end'}>
-                        <Button disabled={false}>Create</Button>
+                        <Button disabled={isPending}>Create</Button>
                     </div>
                 </form>
             </DialogContent>
